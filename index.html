@@ -68,18 +68,24 @@
 
 
 
+    function getMax() {
+        return Array.from(Object.keys(appState.cards)).map(id => appState.cards[id].zIndex).reduce((a, b) => Math.max(a, b), 1)
+    }
+
+
     stageEle.addEventListener("mousedown", e => {
         e.preventDefault()
         // console.dir(e)
 
         if (e.target.className === "miniCard") {
             // console.log("YES")
-
             const timestamp = e.target.dataset.id
             const initClient = [e.clientX, e.clientY]
             const initPos = appState.cards[timestamp].position
             // console.log(initPos)
 
+            appState.cards[timestamp].zIndex = getMax() + 1
+            console.log("当前最大", getMax())
 
             function startMove(e) {
                 const currentClient = [e.clientX, e.clientY]
