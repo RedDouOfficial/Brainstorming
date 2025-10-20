@@ -6,7 +6,8 @@
 
     .miniCard {
         position: absolute;
-
+        cursor: pointer;
+        /* 鼠标悬停时变成抓手 */
     }
 </style>
 
@@ -17,21 +18,17 @@
 
 
 <script>
-
-    // 以 appState 为核心，暂时不需要管可视化的部分。
-
-
     let appState = localStorage.getItem("appState") ?? { cards: {}, XX: "xxx" }
 
     // localStorage.clear()
-    console.dir(appState)
+    // console.dir(appState)
 
     const inputAreaEle = document.querySelector("#input-area")
     const stageEle = document.querySelector("#stage")
 
     function updateOrCreated(card) {
         let cardEle = document.querySelector(`textarea[data-id="${card.created}"]`)
-        console.log(cardEle)
+        // console.log(cardEle)
         if (cardEle === null) {
             console.log("不存在，需要创建")
             cardEle = document.createElement("textarea")
@@ -53,9 +50,9 @@
 
 
 
-    console.dir(inputAreaEle)
+    // console.dir(inputAreaEle)
     inputAreaEle.addEventListener("keypress", (e) => {
-        console.dir(e)
+        // console.dir(e)
         if (e.code === "Enter" && e.shiftKey === false) {
             console.log("用户按下Enter")
             e.preventDefault()
@@ -68,5 +65,38 @@
 
         }
     })
+
+
+
+    stageEle.addEventListener("mousedown", e => {
+        e.preventDefault()
+        // console.dir(e)
+
+        if (e.target.className === "miniCard") {
+            // console.log("YES")
+
+            const timestamp = e.target.dataset.id
+            const initClient = [e.clientX, e.clientY]
+            const initPos = appState.cards[timestamp].position
+            // console.log(initPos)
+
+
+            function startMove(e) {
+                const currentClient = [e.clientX, e.clientY]
+                const dx = currentClient[0] - initClient[0]
+                const dy = currentClient[1] - initClient[1]
+                appState.cards[timestamp].position = [initPos[0] + dx, initPos[1] + dy]
+                updateOrCreated(appState.cards[timestamp])
+            }
+
+            function cancelBind() {
+                removeEventListener("mousemove", startMove)
+                removeEventListener("mouseup", cancelBind)
+            }
+            addEventListener("mousemove", startMove)
+            addEventListener("mouseup", cancelBind)
+        }
+    })
+
 
 </script>
