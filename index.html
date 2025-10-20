@@ -1,0 +1,72 @@
+<style>
+    * {
+        background-color: rgba(0, 0, 0, 0.08);
+        box-shadow: inset 0 0 1px red;
+    }
+
+    .miniCard {
+        position: absolute;
+
+    }
+</style>
+
+<body>
+    <textarea id="input-area" style="width: 100%;">默认测试用</textarea>
+    <div id="stage" style="height: 90%;"> </div>
+</body>
+
+
+<script>
+
+    // 以 appState 为核心，暂时不需要管可视化的部分。
+
+
+    let appState = localStorage.getItem("appState") ?? { cards: {}, XX: "xxx" }
+
+    // localStorage.clear()
+    console.dir(appState)
+
+    const inputAreaEle = document.querySelector("#input-area")
+    const stageEle = document.querySelector("#stage")
+
+    function updateOrCreated(card) {
+        let cardEle = document.querySelector(`textarea[data-id="${card.created}"]`)
+        console.log(cardEle)
+        if (cardEle === null) {
+            console.log("不存在，需要创建")
+            cardEle = document.createElement("textarea")
+            cardEle.className = "miniCard"
+            cardEle.dataset.id = card.created
+            stageEle.appendChild(cardEle)
+
+        }
+
+        cardEle.style.left = card.position[0]
+        cardEle.style.top = card.position[1]
+        cardEle.style.width = card.size[0]
+        cardEle.style.height = card.size[1]
+        cardEle.style.zIndex = card.zIndex
+        cardEle.value = card.content
+
+
+    }
+
+
+
+    console.dir(inputAreaEle)
+    inputAreaEle.addEventListener("keypress", (e) => {
+        console.dir(e)
+        if (e.code === "Enter" && e.shiftKey === false) {
+            console.log("用户按下Enter")
+            e.preventDefault()
+            const timestamp = Date.now()
+
+            const inputContent = inputAreaEle.value
+            inputAreaEle.value = ""
+            appState.cards[timestamp] = { content: inputContent, created: timestamp, position: [360, 360], size: [60, 90], zIndex: 1 }
+            updateOrCreated(appState.cards[timestamp])
+
+        }
+    })
+
+</script>
