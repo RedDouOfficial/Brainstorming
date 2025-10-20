@@ -18,8 +18,17 @@
 
 
 <script>
-    let appState = localStorage.getItem("appState") ?? { cards: {}, XX: "xxx" }
+    let appState
+    if (localStorage.getItem("appState")) {
+        appState = JSON.parse(localStorage.getItem("appState"))
+    } else {
+        appState = { cards: {}, XX: "xxx" }
+    }
 
+
+    function writeToLocal() {
+        localStorage.setItem("appState", JSON.stringify(appState))
+    }
     // localStorage.clear()
     // console.dir(appState)
 
@@ -50,6 +59,13 @@
 
 
 
+    function initAll() {
+        const list = Array.from(Object.keys(appState.cards)).map(id => appState.cards[id])
+        for (let card of list) {
+            updateOrCreated(card)
+        }
+    }
+    initAll()
     // console.dir(inputAreaEle)
     inputAreaEle.addEventListener("keypress", (e) => {
         // console.dir(e)
@@ -61,6 +77,7 @@
             const inputContent = inputAreaEle.value
             inputAreaEle.value = ""
             appState.cards[timestamp] = { content: inputContent, created: timestamp, position: [360, 360], size: [60, 90], zIndex: 1 }
+            writeToLocal()
             updateOrCreated(appState.cards[timestamp])
 
         }
@@ -74,6 +91,8 @@
 
 
     stageEle.addEventListener("mousedown", e => {
+
+
         e.preventDefault()
         // console.dir(e)
 
@@ -93,6 +112,7 @@
                 const dy = currentClient[1] - initClient[1]
                 appState.cards[timestamp].position = [initPos[0] + dx, initPos[1] + dy]
                 updateOrCreated(appState.cards[timestamp])
+                writeToLocal()
             }
 
             function cancelBind() {
@@ -101,7 +121,9 @@
             }
             addEventListener("mousemove", startMove)
             addEventListener("mouseup", cancelBind)
+            writeToLocal()
         }
+
     })
 
 
