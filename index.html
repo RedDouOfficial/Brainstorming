@@ -8,12 +8,13 @@
         position: absolute;
         cursor: pointer;
         /* 鼠标悬停时变成抓手 */
+        width: fit-content;
     }
 </style>
 
 <body>
-    <textarea id="input-area" style="width: 100%;">默认测试用</textarea>
-    <div id="stage" style="height: 90%;"> </div>
+    <textarea id="input-area" style="width: 100%;"></textarea>
+    <pre id="stage" style="height: 90%;"> </pre>
 </body>
 
 
@@ -36,11 +37,11 @@
     const stageEle = document.querySelector("#stage")
 
     function updateOrCreated(card) {
-        let cardEle = document.querySelector(`textarea[data-id="${card.created}"]`)
+        let cardEle = document.querySelector(`div[data-id="${card.created}"]`)
         // console.log(cardEle)
         if (cardEle === null) {
             console.log("不存在，需要创建")
-            cardEle = document.createElement("textarea")
+            cardEle = document.createElement("div")
             cardEle.className = "miniCard"
             cardEle.dataset.id = card.created
             stageEle.appendChild(cardEle)
@@ -49,10 +50,10 @@
 
         cardEle.style.left = card.position[0]
         cardEle.style.top = card.position[1]
-        cardEle.style.width = card.size[0]
-        cardEle.style.height = card.size[1]
+        // cardEle.style.width = card.size[0]
+        // cardEle.style.height = card.size[1]
         cardEle.style.zIndex = card.zIndex
-        cardEle.value = card.content
+        cardEle.textContent = card.content
 
 
     }
