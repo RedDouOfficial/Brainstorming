@@ -2,6 +2,7 @@
     * {
         background-color: rgba(0, 0, 0, 0.08);
         box-shadow: inset 0 0 1px red;
+        box-sizing: border-box;
     }
 
     .miniCard {
@@ -9,6 +10,9 @@
         cursor: pointer;
         /* 鼠标悬停时变成抓手 */
         width: fit-content;
+        padding: 5px;
+        border-radius: 10px;
+        border: 2px solid black;
     }
 </style>
 
@@ -19,12 +23,31 @@
 
 
 <script>
+    const inputAreaEle = document.querySelector("#input-area")
+    const stageEle = document.querySelector("#stage")
+
+
     let appState
+
+
+
+
     if (localStorage.getItem("appState")) {
         appState = JSON.parse(localStorage.getItem("appState"))
     } else {
         appState = { cards: {}, XX: "xxx" }
     }
+
+
+
+    stageEle.addEventListener("click", (e) => {
+        appState.birthCenter = [e.clientX, e.clientY]
+        console.log("出生点更新为", appState.birthCenter)
+
+    })
+
+
+
 
 
     function writeToLocal() {
@@ -33,8 +56,7 @@
     // localStorage.clear()
     // console.dir(appState)
 
-    const inputAreaEle = document.querySelector("#input-area")
-    const stageEle = document.querySelector("#stage")
+
 
     function updateOrCreated(card) {
         let cardEle = document.querySelector(`div[data-id="${card.created}"]`)
@@ -59,6 +81,21 @@
     }
 
 
+    function deleteCard(id) {
+        delete appState.cards[id]
+        let cardEle = document.querySelector(`div[data-id="${id}"]`)
+        cardEle.parentElement.removeChild(cardEle)
+        writeToLocal()
+    }
+
+    addEventListener("mousedown", e => {
+        console.dir(e)
+        if (e.button === 1 && e.target.className === "miniCard") {
+            e.preventDefault()
+            deleteCard(e.target.dataset.id)
+        }
+    })
+
 
     function initAll() {
         const list = Array.from(Object.keys(appState.cards)).map(id => appState.cards[id])
@@ -77,7 +114,7 @@
 
             const inputContent = inputAreaEle.value
             inputAreaEle.value = ""
-            appState.cards[timestamp] = { content: inputContent, created: timestamp, position: [360, 360], size: [60, 90], zIndex: 1 }
+            appState.cards[timestamp] = { content: inputContent, created: timestamp, position: appState.birthCenter, size: [60, 90], zIndex: 1 }
             writeToLocal()
             updateOrCreated(appState.cards[timestamp])
 
