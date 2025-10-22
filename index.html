@@ -7,13 +7,15 @@
 
     .miniCard {
         position: absolute;
+        display: inline-block;
         cursor: pointer;
         /* 鼠标悬停时变成抓手 */
         width: fit-content;
         padding: 5px;
         border-radius: 10px;
         border: 2px solid black;
-        transform: translate(-50%, -50%);
+        margin: 3px;
+        /* transform: translate(-50%, -50%); */
     }
 
     #birth {
@@ -26,19 +28,23 @@
         top: 200px;
         z-index: 0;
     }
+
+    #stage {
+        white-space: normal;
+    }
 </style>
 
 <body>
     <textarea id="input-area" style="width: 100%;"></textarea>
     <pre id="stage" style="height: 90%;"> </pre>
-    <div id="birth"></div>
+    <!-- <div id="birth"></div> -->
 </body>
 
 
 <script>
     const inputAreaEle = document.querySelector("#input-area")
     const stageEle = document.querySelector("#stage")
-    const helper = document.querySelector("#birth")
+    // const helper = document.querySelector("#birth")
 
     let appState
 
@@ -56,8 +62,8 @@
     stageEle.addEventListener("click", (e) => {
         appState.birthCenter = [e.clientX, e.clientY]
         console.log("出生点更新为", appState.birthCenter)
-        helper.style.left = e.clientX - 30
-        helper.style.top = e.clientY - 30
+        // helper.style.left = e.clientX - 30
+        // helper.style.top = e.clientY - 30
     })
 
 
@@ -80,17 +86,18 @@
             cardEle = document.createElement("div")
             cardEle.className = "miniCard"
             cardEle.dataset.id = card.created
-            stageEle.appendChild(cardEle)
+            stageEle.prepend(cardEle)
 
         }
-
+        cardEle.style.position = card.stylePosition
+        // cardEle.style.position = "absolute"
         cardEle.style.left = card.position[0]
         cardEle.style.top = card.position[1]
         // cardEle.style.width = card.size[0]
         // cardEle.style.height = card.size[1]
         cardEle.style.zIndex = card.zIndex
         cardEle.textContent = card.content
-
+        return cardEle
 
     }
 
@@ -128,7 +135,7 @@
 
             const inputContent = inputAreaEle.value
             inputAreaEle.value = ""
-            appState.cards[timestamp] = { content: inputContent, created: timestamp, position: appState.birthCenter, size: [60, 90], zIndex: 1 }
+            appState.cards[timestamp] = { content: inputContent, created: timestamp, position: appState.birthCenter, size: [60, 90], zIndex: 1, stylePosition: "static" }
             writeToLocal()
             updateOrCreated(appState.cards[timestamp])
 
@@ -152,9 +159,10 @@
             // console.log("YES")
             const timestamp = e.target.dataset.id
             const initClient = [e.clientX, e.clientY]
-            const initPos = appState.cards[timestamp].position
+            // const initPos = appState.cards[timestamp].position
+            const initPos = [e.target.offsetLeft, e.target.offsetTop]
             // console.log(initPos)
-
+            appState.cards[timestamp].stylePosition = "absolute"
             appState.cards[timestamp].zIndex = getMax() + 1
             console.log("当前最大", getMax())
 
@@ -163,7 +171,9 @@
                 const dx = currentClient[0] - initClient[0]
                 const dy = currentClient[1] - initClient[1]
                 appState.cards[timestamp].position = [initPos[0] + dx, initPos[1] + dy]
+
                 updateOrCreated(appState.cards[timestamp])
+
                 writeToLocal()
             }
 
