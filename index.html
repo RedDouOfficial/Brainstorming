@@ -13,19 +13,32 @@
         padding: 5px;
         border-radius: 10px;
         border: 2px solid black;
+        transform: translate(-50%, -50%);
+    }
+
+    #birth {
+        position: absolute;
+        background-color: rgba(67, 196, 205, 0.135);
+        width: 60px;
+        height: 60px;
+        border-radius: 30px;
+        left: 150px;
+        top: 200px;
+        z-index: 0;
     }
 </style>
 
 <body>
     <textarea id="input-area" style="width: 100%;"></textarea>
     <pre id="stage" style="height: 90%;"> </pre>
+    <div id="birth"></div>
 </body>
 
 
 <script>
     const inputAreaEle = document.querySelector("#input-area")
     const stageEle = document.querySelector("#stage")
-
+    const helper = document.querySelector("#birth")
 
     let appState
 
@@ -43,7 +56,8 @@
     stageEle.addEventListener("click", (e) => {
         appState.birthCenter = [e.clientX, e.clientY]
         console.log("出生点更新为", appState.birthCenter)
-
+        helper.style.left = e.clientX - 30
+        helper.style.top = e.clientY - 30
     })
 
 
