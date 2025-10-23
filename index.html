@@ -199,7 +199,11 @@
             appState.cards[timestamp].stylePosition = "absolute"
             appState.cards[timestamp].zIndex = getMaxZIndex() + 1
 
+
+            let lastE
             function startMove(e) {
+                lastE = e
+                console.dir(e)
                 const currentClient = [e.clientX, e.clientY]
                 const dx = currentClient[0] - initClient[0]
                 const dy = currentClient[1] - initClient[1]
@@ -211,6 +215,11 @@
             function cancelBind() {
                 removeEventListener("mousemove", startMove)
                 removeEventListener("mouseup", cancelBind)
+
+                if (lastE.clientX <= stageEle.clientWidth) {
+                    appState.cards[timestamp].stylePosition = "static"
+                    e.target.style.position = "static"
+                }
             }
             addEventListener("mousemove", startMove)
             addEventListener("mouseup", cancelBind)
