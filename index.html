@@ -13,7 +13,7 @@
     }
 
     aside {
-        width: 360px;
+        width: 380px;
         margin: 15px;
 
         &>* {
@@ -65,7 +65,7 @@
 </style>
 
 <body>
-    <aside>
+    <aside id="side-bar">
         <textarea id="input-area" autofocus></textarea>
         <pre id="stage"> </pre>
     </aside>
@@ -76,6 +76,7 @@
 <script>
     const inputAreaEle = document.querySelector("#input-area")
     const stageEle = document.querySelector("#stage")
+    const sideBarEle = document.querySelector("#side-bar")
 
     // 加载储存的数据
     let appState
@@ -110,6 +111,7 @@
 
 
     function initAll() {
+        sideBarEle.style.width = appState.sideBarWidth
         const list = Array.from(Object.keys(appState.cards)).map(id => appState.cards[id])
         for (let card of list) {
             updateOrCreated(card)
@@ -241,4 +243,34 @@
         }
     })
     // ================================================================双击搜索功能
+
+
+
+    // aside 宽度调整功能 ================================================================
+    sideBarEle.addEventListener("mousedown", e => {
+        console.dir(e)
+        const initClientX = e.clientX
+        const initWidth = sideBarEle.clientWidth
+
+
+        function startAdjust(e) {
+            dx = e.clientX - initClientX
+            sideBarEle.style.width = appState.sideBarWidth = Math.min(Math.max(200, initWidth + dx), 1880)
+            writeToLocal()
+        }
+        function cancelBind(e) {
+            removeEventListener("mousemove", startAdjust)
+            removeEventListener("mouseup", cancelBind)
+        }
+
+        addEventListener("mousemove", startAdjust)
+        addEventListener("mouseup", cancelBind)
+
+    })
+
+    //  ================================================================ aside 宽度调整功能
+
+
+
+
 </script>
