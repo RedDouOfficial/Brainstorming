@@ -1,85 +1,96 @@
 <style>
     * {
-        background-color: rgba(0, 0, 0, 0.08);
-        box-shadow: inset 0 0 1px red;
         box-sizing: border-box;
+        color: white;
+        font-family: "等线";
     }
 
-    .miniCard {
-        position: absolute;
-        display: inline-block;
-        cursor: pointer;
-        /* 鼠标悬停时变成抓手 */
-        width: fit-content;
-        padding: 5px;
-        border-radius: 10px;
-        border: 2px solid black;
-        margin: 3px;
-        /* transform: translate(-50%, -50%); */
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #1f2223;
     }
 
-    #birth {
-        position: absolute;
-        background-color: rgba(67, 196, 205, 0.135);
-        width: 60px;
-        height: 60px;
-        border-radius: 30px;
-        left: 150px;
-        top: 200px;
-        z-index: 0;
-    }
+    aside {
+        width: 360px;
+        margin: 15px;
 
-    #stage {
-        white-space: normal;
+        &>* {
+            border-radius: 1em;
+        }
+
+        &>#input-area {
+            background-color: #4d5156;
+            padding: 1em;
+            width: 100%;
+            height: 5em;
+            resize: none;
+            outline: 0;
+        }
+
+        &>#stage {
+            background: linear-gradient(#4d5156, #1f2223) !important;
+            white-space: normal;
+            height: 80%;
+
+            &>.miniCard {
+                position: absolute;
+                display: inline-block;
+                cursor: pointer;
+
+                padding: 0.5em;
+                margin: 5px;
+                border-radius: 1em;
+
+                font-weight: 700;
+
+                box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.325);
+                min-width: 3em;
+                min-height: 33px;
+                vertical-align: middle;
+                text-align: center;
+
+
+                transition: box-shadow 0.3s ease;
+
+                &:hover {
+                    box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.673);
+                    /* transform: scale(1.05); */
+                }
+
+            }
+        }
     }
 </style>
 
 <body>
-    <textarea id="input-area" style="width: 100%;"></textarea>
-    <pre id="stage" style="height: 90%;"> </pre>
-    <!-- <div id="birth"></div> -->
+    <aside>
+        <textarea id="input-area" autofocus></textarea>
+        <pre id="stage"> </pre>
+    </aside>
+
 </body>
 
 
 <script>
     const inputAreaEle = document.querySelector("#input-area")
     const stageEle = document.querySelector("#stage")
-    // const helper = document.querySelector("#birth")
 
+    // 加载储存的数据
     let appState
 
+    if (localStorage.getItem("appState")) appState = JSON.parse(localStorage.getItem("appState"))
+    else appState = { cards: {} }
 
 
-
-    if (localStorage.getItem("appState")) {
-        appState = JSON.parse(localStorage.getItem("appState"))
-    } else {
-        appState = { cards: {}, XX: "xxx" }
-    }
-
-
-
-    stageEle.addEventListener("click", (e) => {
-        appState.birthCenter = [e.clientX, e.clientY]
-        console.log("出生点更新为", appState.birthCenter)
-        // helper.style.left = e.clientX - 30
-        // helper.style.top = e.clientY - 30
-    })
-
-
-
-
-
+    // 写入
     function writeToLocal() {
         localStorage.setItem("appState", JSON.stringify(appState))
     }
-    // localStorage.clear()
-    // console.dir(appState)
-
-
 
     function updateOrCreated(card) {
-        let cardEle = document.querySelector(`div[data-id="${card.created}"]`)
+        let cardEle = document.querySelector(`[data-id="${card.created}"]`)
         // console.log(cardEle)
         if (cardEle === null) {
             console.log("不存在，需要创建")
@@ -87,35 +98,15 @@
             cardEle.className = "miniCard"
             cardEle.dataset.id = card.created
             stageEle.prepend(cardEle)
-
         }
+
         cardEle.style.position = card.stylePosition
-        // cardEle.style.position = "absolute"
         cardEle.style.left = card.position[0]
         cardEle.style.top = card.position[1]
-        // cardEle.style.width = card.size[0]
-        // cardEle.style.height = card.size[1]
         cardEle.style.zIndex = card.zIndex
         cardEle.textContent = card.content
-        return cardEle
-
+        cardEle.style.background = card.bgc
     }
-
-
-    function deleteCard(id) {
-        delete appState.cards[id]
-        let cardEle = document.querySelector(`div[data-id="${id}"]`)
-        cardEle.parentElement.removeChild(cardEle)
-        writeToLocal()
-    }
-
-    addEventListener("mousedown", e => {
-        console.dir(e)
-        if (e.button === 1 && e.target.className === "miniCard") {
-            e.preventDefault()
-            deleteCard(e.target.dataset.id)
-        }
-    })
 
 
     function initAll() {
@@ -125,55 +116,95 @@
         }
     }
     initAll()
-    // console.dir(inputAreaEle)
+
+    // 回车就能创建================================================================
+
     inputAreaEle.addEventListener("keypress", (e) => {
-        // console.dir(e)
         if (e.code === "Enter" && e.shiftKey === false) {
             console.log("用户按下Enter")
             e.preventDefault()
             const timestamp = Date.now()
-
             const inputContent = inputAreaEle.value
+
             inputAreaEle.value = ""
-            appState.cards[timestamp] = { content: inputContent, created: timestamp, position: appState.birthCenter, size: [60, 90], zIndex: 1, stylePosition: "static" }
+
+
+            const hue1 = Math.floor(Math.random() * 360)
+            const hue2 = hue1 + 10
+            const hue3 = hue1 + 20
+
+            const color1 = `hsla(${hue1},100%,50%,0.5)`
+            const color2 = `hsla(${hue2},100%,50%,0.5)`
+            const color3 = `hsla(${hue3},100%,50%,0.5)`
+
+            const degree = Math.floor(Math.random() * 360)
+
+            const gradientStr = `linear-gradient(${degree}deg,${color1},${color2},${color3})`
+            console.log(gradientStr)
+            appState.cards[timestamp] = { content: inputContent, created: timestamp, position: [0, 0], size: [60, 90], zIndex: 1, stylePosition: "static", bgc: gradientStr }
+
             writeToLocal()
             updateOrCreated(appState.cards[timestamp])
 
         }
     })
 
+    // ================================================================回车就能创建
+
+    // 中键删除功能================================================================
+    function deleteCard(id) {
+        delete appState.cards[id]
+        let cardEle = document.querySelector(`[data-id="${id}"]`)
+        cardEle.parentElement.removeChild(cardEle)
+        writeToLocal()
+    }
+
+    addEventListener("mousedown", e => {
+        // console.dir(e)
+        if (e.button === 1 && e.target.matches(".miniCard")) {
+            e.preventDefault()
+            deleteCard(e.target.dataset.id)
+        }
+    })
+    // ================================================================中键删除功能
 
 
-    function getMax() {
+    // 全部清空功能================================================================
+
+    addEventListener("keypress", e => {
+        console.dir(e)
+        if (e.code === "KeyQ" && e.shiftKey && e.ctrlKey) {
+            appState = { cards: {} }
+            localStorage.clear()
+            console.dir(appState)
+            initAll()
+        }
+    })
+
+    // ================================================================全部清空功能
+
+
+    // 卡片拖动================================================================
+    function getMaxZIndex() {
         return Array.from(Object.keys(appState.cards)).map(id => appState.cards[id].zIndex).reduce((a, b) => Math.max(a, b), 1)
     }
 
-
     stageEle.addEventListener("mousedown", e => {
-
-
         e.preventDefault()
-        // console.dir(e)
-
         if (e.target.className === "miniCard") {
-            // console.log("YES")
             const timestamp = e.target.dataset.id
             const initClient = [e.clientX, e.clientY]
-            // const initPos = appState.cards[timestamp].position
             const initPos = [e.target.offsetLeft, e.target.offsetTop]
-            // console.log(initPos)
+
             appState.cards[timestamp].stylePosition = "absolute"
-            appState.cards[timestamp].zIndex = getMax() + 1
-            console.log("当前最大", getMax())
+            appState.cards[timestamp].zIndex = getMaxZIndex() + 1
 
             function startMove(e) {
                 const currentClient = [e.clientX, e.clientY]
                 const dx = currentClient[0] - initClient[0]
                 const dy = currentClient[1] - initClient[1]
                 appState.cards[timestamp].position = [initPos[0] + dx, initPos[1] + dy]
-
                 updateOrCreated(appState.cards[timestamp])
-
                 writeToLocal()
             }
 
@@ -183,10 +214,22 @@
             }
             addEventListener("mousemove", startMove)
             addEventListener("mouseup", cancelBind)
+
             writeToLocal()
         }
-
     })
+    // ================================================================卡片拖动
 
 
+    // 双击搜索功能================================================================
+    addEventListener("dblclick", e => {
+        console.dir(e)
+
+        if (e.target.matches(".miniCard")) {
+            console.log("用户双击了卡片")
+            const keyword = e.target.textContent
+            window.open(`https://www.google.com/search?q=${keyword}`, "_blank");
+        }
+    })
+    // ================================================================双击搜索功能
 </script>
