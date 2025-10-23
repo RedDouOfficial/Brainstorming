@@ -248,23 +248,25 @@
 
     // aside 宽度调整功能 ================================================================
     sideBarEle.addEventListener("mousedown", e => {
-        console.dir(e)
-        const initClientX = e.clientX
-        const initWidth = sideBarEle.clientWidth
+        if (e.target.matches("pre#stage")) {
+            console.dir(e)
+            const initClientX = e.clientX
+            const initWidth = sideBarEle.clientWidth
 
 
-        function startAdjust(e) {
-            dx = e.clientX - initClientX
-            sideBarEle.style.width = appState.sideBarWidth = Math.min(Math.max(200, initWidth + dx), 1880)
-            writeToLocal()
+            function startAdjust(e) {
+                dx = e.clientX - initClientX
+                sideBarEle.style.width = appState.sideBarWidth = Math.min(Math.max(200, initWidth + dx), 1880)
+                writeToLocal()
+            }
+            function cancelBind(e) {
+                removeEventListener("mousemove", startAdjust)
+                removeEventListener("mouseup", cancelBind)
+            }
+
+            addEventListener("mousemove", startAdjust)
+            addEventListener("mouseup", cancelBind)
         }
-        function cancelBind(e) {
-            removeEventListener("mousemove", startAdjust)
-            removeEventListener("mouseup", cancelBind)
-        }
-
-        addEventListener("mousemove", startAdjust)
-        addEventListener("mouseup", cancelBind)
 
     })
 
