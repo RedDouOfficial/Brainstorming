@@ -1,6 +1,6 @@
 # 极简头脑风暴工具
 
-![alt text](./image.png)
+![alt text](img/image.png)
 [在线体验](https://reddouofficial.github.io/Brainstorming/)
 
 ## Trigger
