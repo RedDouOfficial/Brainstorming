@@ -67,12 +67,15 @@
     #topic {
         position: fixed;
         left: 55%;
-        top: 5%;
+        top: 50%;
         transform: translate(-50%, -50%);
-        font-size: 50px;
+        font-family: Georgia, 'Times New Roman', Times, serif;
+        font-size: 120px;
         user-select: none;
-
+        opacity: 0.1;
         font-weight: 900;
+        width: 100%;
+        text-align: center;
     }
 </style>
 
@@ -137,6 +140,21 @@
 
     // 回车就能创建================================================================
 
+    function genRandomGradient() {
+        const hue1 = Math.floor(Math.random() * 360)
+        const hue2 = hue1 + 15
+        const hue3 = hue1 + 30
+        const color1 = `hsla(${hue1},100%,50%,0.5)`
+        const color2 = `hsla(${hue2},100%,50%,0.5)`
+        const color3 = `hsla(${hue3},100%,50%,0.5)`
+
+        const degree = Math.floor(Math.random() * 360)
+
+        const gradientStr = `linear-gradient(${degree}deg,${color1},${color2},${color3})`
+
+        return gradientStr
+    }
+
     inputAreaEle.addEventListener("keypress", (e) => {
         if (e.code === "Enter" && e.shiftKey === false) {
             console.log("用户按下Enter")
@@ -146,19 +164,7 @@
 
             inputAreaEle.value = ""
 
-
-            const hue1 = Math.floor(Math.random() * 360)
-            const hue2 = hue1 + 10
-            const hue3 = hue1 + 20
-
-            const color1 = `hsla(${hue1},100%,50%,0.5)`
-            const color2 = `hsla(${hue2},100%,50%,0.5)`
-            const color3 = `hsla(${hue3},100%,50%,0.5)`
-
-            const degree = Math.floor(Math.random() * 360)
-
-            const gradientStr = `linear-gradient(${degree}deg,${color1},${color2},${color3})`
-            console.log(gradientStr)
+            const gradientStr = genRandomGradient()
             appState.cards[timestamp] = { content: inputContent, created: timestamp, position: [0, 0], size: [60, 90], zIndex: 1, stylePosition: "static", bgc: gradientStr }
 
             writeToLocal()
