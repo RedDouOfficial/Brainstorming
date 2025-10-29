@@ -1,4 +1,10 @@
 <style>
+    :root {
+        --card-color: white
+    }
+
+
+
     * {
         box-sizing: border-box;
         color: white;
@@ -52,7 +58,8 @@
                 text-align: center;
 
 
-                transition: box-shadow 0.3s ease;
+                transition: box-shadow 0.3s ease, filter .1s, color .1s;
+
 
                 &:hover {
                     box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.673);
@@ -76,6 +83,17 @@
         font-weight: 900;
         width: 100%;
         text-align: center;
+    }
+
+    .miniCard {
+        /* filter: blur(2px); */
+        color: var(--card-color);
+
+        &:hover {
+            color: rgb(255, 255, 255);
+            /* filter: blur(0); */
+        }
+
     }
 </style>
 
@@ -109,6 +127,7 @@
         },
         currentNoteId: "10000000",
         sideBarWidth: 200,
+        secretMode: false
     }
 
     // 写入
@@ -137,6 +156,7 @@
 
 
     function initAll() {
+        updateSecretMode()
         stageEle.innerHTML = ""
         sideBarEle.style.width = appState.sideBarWidth
         topicEle.textContent = appState.notes[appState.currentNoteId].topic
@@ -167,7 +187,7 @@
 
     inputAreaEle.addEventListener("keypress", (e) => {
         if (e.code === "Enter" && e.shiftKey === false) {
-            console.log("用户按下Enter")
+            // console.log("用户按下Enter")
             e.preventDefault()
             const timestamp = Date.now()
             const inputContent = inputAreaEle.value
@@ -208,7 +228,7 @@
     addEventListener("keypress", e => {
         console.dir(e)
         if (e.code === "KeyQ" && e.shiftKey && e.ctrlKey) {
-            appState = { cards: {} }
+            appState = {}
             localStorage.clear()
             console.dir(appState)
             initAll()
@@ -389,6 +409,29 @@
         }
     })
     // ================================================================↑↓切换笔记
+
+
+
+    // 隐私模式================================================================
+
+    function updateSecretMode() {
+        if (appState.secretMode) {
+            document.documentElement.style.setProperty('--card-color', ' rgb(255, 255, 255,0)');
+        } else {
+            document.documentElement.style.setProperty('--card-color', ' rgb(255, 255, 255,1)');
+        }
+    }
+
+
+    addEventListener("keypress", e => {
+        if (e.code === "KeyS") {
+            console.dir(e)
+            appState.secretMode = !appState.secretMode
+            writeToLocal()
+            updateSecretMode()
+        }
+    })
+    // ================================================================隐私模式
 
 
 </script>
