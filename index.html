@@ -99,8 +99,17 @@
     let appState
 
     if (localStorage.getItem("appState")) appState = JSON.parse(localStorage.getItem("appState"))
-    else appState = { cards: {} }
-
+    else appState = {
+        notes: {
+            "10000000": {
+                topic: "Object To BUY",
+                cards: {},
+                id: "10000000"
+            }
+        },
+        currentNoteId: "10000000",
+        sideBarWidth: 200,
+    }
 
     // 写入
     function writeToLocal() {
@@ -128,10 +137,11 @@
 
 
     function initAll() {
+        stageEle.innerHTML = ""
         sideBarEle.style.width = appState.sideBarWidth
-        topicEle.textContent = appState.topic
+        topicEle.textContent = appState.notes[appState.currentNoteId].topic
 
-        const list = Array.from(Object.keys(appState.cards)).map(id => appState.cards[id])
+        const list = Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id])
         for (let card of list) {
             updateOrCreated(card)
         }
@@ -165,10 +175,10 @@
             inputAreaEle.value = ""
 
             const gradientStr = genRandomGradient()
-            appState.cards[timestamp] = { content: inputContent, created: timestamp, position: [0, 0], size: [60, 90], zIndex: 1, stylePosition: "static", bgc: gradientStr }
+            appState.notes[appState.currentNoteId].cards[timestamp] = { content: inputContent, created: timestamp, position: [0, 0], size: [60, 90], zIndex: 1, stylePosition: "static", bgc: gradientStr }
 
             writeToLocal()
-            updateOrCreated(appState.cards[timestamp])
+            updateOrCreated(appState.notes[appState.currentNoteId].cards[timestamp])
 
         }
     })
@@ -177,7 +187,7 @@
 
     // 中键删除功能================================================================
     function deleteCard(id) {
-        delete appState.cards[id]
+        delete appState.notes[appState.currentNoteId].cards[id]
         let cardEle = document.querySelector(`[data-id="${id}"]`)
         cardEle.parentElement.removeChild(cardEle)
         writeToLocal()
@@ -210,7 +220,7 @@
 
     // 卡片拖动================================================================
     function getMaxZIndex() {
-        return Array.from(Object.keys(appState.cards)).map(id => appState.cards[id].zIndex).reduce((a, b) => Math.max(a, b), 1)
+        return Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id].zIndex).reduce((a, b) => Math.max(a, b), 1)
     }
 
     stageEle.addEventListener("mousedown", e => {
@@ -220,8 +230,8 @@
             const initClient = [e.clientX, e.clientY]
             const initPos = [e.target.offsetLeft, e.target.offsetTop]
 
-            appState.cards[timestamp].stylePosition = "absolute"
-            appState.cards[timestamp].zIndex = getMaxZIndex() + 1
+            appState.notes[appState.currentNoteId].cards[timestamp].stylePosition = "absolute"
+            appState.notes[appState.currentNoteId].cards[timestamp].zIndex = getMaxZIndex() + 1
 
 
             let lastE
@@ -230,12 +240,12 @@
                 // e.target.style.cursor = "grabbing"
 
                 lastE = e
-                console.dir(e)
+                // console.dir(e)
                 const currentClient = [e.clientX, e.clientY]
                 const dx = currentClient[0] - initClient[0]
                 const dy = currentClient[1] - initClient[1]
-                appState.cards[timestamp].position = [initPos[0] + dx, initPos[1] + dy]
-                updateOrCreated(appState.cards[timestamp])
+                appState.notes[appState.currentNoteId].cards[timestamp].position = [initPos[0] + dx, initPos[1] + dy]
+                updateOrCreated(appState.notes[appState.currentNoteId].cards[timestamp])
                 writeToLocal()
 
             }
@@ -246,8 +256,8 @@
             }
 
             function endMove() {
-                if (lastE.clientX <= stageEle.clientWidth) {
-                    appState.cards[timestamp].stylePosition = "static"
+                if (lastE && lastE.clientX <= stageEle.clientWidth) {
+                    appState.notes[appState.currentNoteId].cards[timestamp].stylePosition = "static"
                     e.target.style.position = "static"
                 }
                 // document.documentElement.style.cursor = "default"
@@ -267,7 +277,7 @@
 
     // 双击搜索功能================================================================
     addEventListener("dblclick", e => {
-        console.dir(e)
+        // console.dir(e)
 
         if (e.target.matches(".miniCard")) {
             console.log("用户双击了卡片")
@@ -291,7 +301,7 @@
     })
     sideBarEle.addEventListener("mousedown", e => {
         if (e.target.matches("pre#stage")) {
-            console.dir(e)
+            // console.dir(e)
             const initClientX = e.clientX
             const initWidth = sideBarEle.clientWidth
 
@@ -320,18 +330,62 @@
 
     //  ================================================================ aside 宽度调整功能
 
-    // 全部清空功能================================================================
+    // 编辑题目功能================================================================
 
     addEventListener("keypress", e => {
-        console.dir(e)
+        // console.dir(e)
         if (e.code === "KeyT") {
-            const topic = prompt("请输入本次围绕的主题")
-            topicEle.textContent = appState.topic = topic
+            const topic = prompt("请编辑本次围绕的主题")
+            topicEle.textContent = appState.notes[appState.currentNoteId].topic = topic
             writeToLocal()
         }
     })
 
-    // ================================================================全部清空功能
+    // ================================================================编辑题目功能
+
+
+    // 导出数据功能================================================================
+
+    addEventListener("keypress", e => {
+        if (e.code === "KeyE") {
+            e.preventDefault()
+            const text = Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id].content).join("\n")
+            navigator.clipboard.writeText(text)
+        }
+    })
+
+    // ================================================================导出数据功能
+
+
+    // 多个文件功能================================================================
+
+    addEventListener("keypress", e => {
+        if (e.code === "KeyN") {
+            // console.dir(e.code)
+            const timestamp = Date.now()
+            const topic = prompt("请输入本次围绕的主题")
+            if (!appState.notes) { appState.notes = {} }
+            appState.notes[timestamp] = { topic: topic, cards: {}, id: timestamp }
+            appState.currentNoteId = timestamp
+            writeToLocal()
+            initAll()
+        }
+    })
+    // ================================================================多个文件功能
+
+
+    // ↑↓切换笔记================================================================
+
+    addEventListener("keyup", e => {
+        if (e.code === "ArrowDown" || e.code === "ArrowUp") {
+            const keyList = Object.keys(appState.notes)
+            appState.currentNoteId = keyList[(Number(keyList.indexOf(appState.currentNoteId)) + 1) % keyList.length]
+            console.log(appState.currentNoteId)
+            writeToLocal()
+            initAll()
+        }
+    })
+    // ================================================================↑↓切换笔记
 
 
 </script>
