@@ -3,12 +3,10 @@
         --card-color: white
     }
 
-
-
     * {
-        box-sizing: border-box;
-        color: white;
-        font-family: "等线";
+        /* box-sizing: border-box;
+        color: rgb(1, 22, 255); */
+        /* font-family: "等线"; */
     }
 
     html,
@@ -28,6 +26,7 @@
 
         &>#input-area {
             background-color: #4d5156;
+            color: white;
             padding: 1em;
             width: 100%;
             height: 5em;
@@ -49,14 +48,16 @@
                 margin: 5px;
                 border-radius: 1em;
 
+
                 font-weight: 700;
 
                 box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.325);
-                min-width: 3em;
-                min-height: 33px;
+                /* min-width: 3em;
+                min-height: 33px; */
                 vertical-align: middle;
                 text-align: center;
 
+                white-space: pre-line;
 
                 transition: box-shadow 0.3s ease, filter .1s, color .1s;
 
@@ -85,7 +86,8 @@
         text-align: center;
     }
 
-    .miniCard {
+    .miniCard,
+    #topic {
         /* filter: blur(2px); */
         color: var(--card-color);
 
@@ -95,10 +97,37 @@
         }
 
     }
+
+    #toolbar {
+        background-color: #1f2223;
+        padding: 5px;
+
+        color: black;
+
+        & button {
+            color: rgb(0, 0, 0);
+        }
+
+    }
 </style>
 
 <body>
+    <div id="toolbar">
+        <select id="file-explorer" style="min-width: 150px ;height: 25px;"> </select>
+        <button onclick="createNewTopic()">创建新画布</button>
+        <button onclick="deleteCurrentTopic()">删除当前画布</button>
+        <button onclick="editCurrentTopic()">编辑话题</button>
+        <button onclick="resetAll()">清空一切</button>
+        <button onclick="currentToClipboard()">导出当前笔记</button>
+        <button onclick="exportAll()">备份·导出</button>
+        <button onclick="importAll()">备份·导入</button>
+        <button onclick="switchSecretMode()">隐私模式切换</button>
+        <button onclick="pureMode()">纯净模式</button>
+    </div>
+
+
     <aside id="side-bar">
+
         <textarea id="input-area" autofocus></textarea>
         <pre id="stage"> </pre>
     </aside>
@@ -112,6 +141,8 @@
     const stageEle = document.querySelector("#stage")
     const sideBarEle = document.querySelector("#side-bar")
     const topicEle = document.querySelector("#topic")
+    const fileExplorerEle = document.querySelector("#file-explorer")
+    const toolBarEle = document.querySelector("#toolbar")
 
     // 加载储存的数据
     let appState
@@ -135,6 +166,20 @@
         localStorage.setItem("appState", JSON.stringify(appState))
     }
 
+
+    function exportAll() {
+        const output = JSON.stringify(appState)
+        navigator.clipboard.writeText(output)
+    }
+    function importAll() {
+        const inputStr = prompt("请输入导出的数据")
+        if (inputStr.trim() !== "") {
+            appState = JSON.parse(inputStr)
+            writeToLocal()
+            initAll()
+        }
+    }
+
     function updateOrCreated(card) {
         let cardEle = document.querySelector(`[data-id="${card.created}"]`)
         // console.log(cardEle)
@@ -155,11 +200,35 @@
     }
 
 
+
+    function updateFileExplorerView() {
+        fileExplorerEle.innerHTML = ""
+        for (let id in appState.notes) {
+            const optionEle = document.createElement("option")
+            optionEle.value = id
+            optionEle.textContent = appState.notes[id].topic
+            fileExplorerEle.appendChild(optionEle)
+        }
+        fileExplorerEle.value = appState.currentNoteId
+    }
+
+    fileExplorerEle.addEventListener("change", e => {
+        switchNote(fileExplorerEle.value)
+    })
+
+    function switchNote(id) {
+        appState.currentNoteId = id
+        writeToLocal()
+        initAll()
+    }
+
+
     function initAll() {
-        updateSecretMode()
+        updateFileExplorerView()
+        updateSecretModeView()
         stageEle.innerHTML = ""
         sideBarEle.style.width = appState.sideBarWidth
-        topicEle.textContent = appState.notes[appState.currentNoteId].topic
+        topicEle.textContent = appState.notes[appState.currentNoteId].topic ?? ""
 
         const list = Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id])
         for (let card of list) {
@@ -224,14 +293,19 @@
 
 
     // 全部清空功能================================================================
-
-    addEventListener("keypress", e => {
-        console.dir(e)
-        if (e.code === "KeyQ" && e.shiftKey && e.ctrlKey) {
+    function resetAll() {
+        const sureText = prompt("将会重置一切。确认请输入：确认删除一切")
+        if (sureText === "确认删除一切") {
             appState = {}
             localStorage.clear()
             console.dir(appState)
             initAll()
+        }
+    }
+    addEventListener("keypress", e => {
+        console.dir(e)
+        if (e.code === "KeyQ" && e.shiftKey && e.ctrlKey) {
+            resetAll()
         }
     })
 
@@ -352,12 +426,17 @@
 
     // 编辑题目功能================================================================
 
+    function editCurrentTopic() {
+        const topic = prompt("请编辑本次围绕的主题", appState.notes[appState.currentNoteId].topic ?? "")
+        topicEle.textContent = appState.notes[appState.currentNoteId].topic = topic
+        writeToLocal()
+        initAll()
+    }
+
     addEventListener("keypress", e => {
         // console.dir(e)
         if (e.code === "KeyT") {
-            const topic = prompt("请编辑本次围绕的主题")
-            topicEle.textContent = appState.notes[appState.currentNoteId].topic = topic
-            writeToLocal()
+            editCurrentTopic()
         }
     })
 
@@ -365,34 +444,49 @@
 
 
     // 导出数据功能================================================================
+    function currentToClipboard() {
+        const text = Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id].content).join("\n")
+        navigator.clipboard.writeText(text)
+    }
 
     addEventListener("keypress", e => {
         if (e.code === "KeyE") {
             e.preventDefault()
-            const text = Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id].content).join("\n")
-            navigator.clipboard.writeText(text)
+            currentToClipboard()
         }
     })
 
     // ================================================================导出数据功能
 
 
-    // 多个文件功能================================================================
-
-    addEventListener("keypress", e => {
-        if (e.code === "KeyN") {
-            // console.dir(e.code)
-            const timestamp = Date.now()
-            const topic = prompt("请输入本次围绕的主题")
+    // Create new Topic ================================================================
+    function createNewTopic() {
+        const timestamp = Date.now()
+        const topic = prompt("请输入本次围绕的主题")
+        if (topic !== "") {
             if (!appState.notes) { appState.notes = {} }
             appState.notes[timestamp] = { topic: topic, cards: {}, id: timestamp }
             appState.currentNoteId = timestamp
             writeToLocal()
             initAll()
         }
-    })
-    // ================================================================多个文件功能
 
+    }
+
+    addEventListener("keypress", e => {
+        if (e.code === "KeyN") {
+            createNewTopic()
+        }
+    })
+    // ================================================================ Create new Topic
+
+
+
+    function deleteCurrentTopic() {
+        delete appState.notes[appState.currentNoteId]
+        writeToLocal()
+        initAll()
+    }
 
     // ↑↓切换笔记================================================================
 
@@ -414,7 +508,7 @@
 
     // 隐私模式================================================================
 
-    function updateSecretMode() {
+    function updateSecretModeView() {
         if (appState.secretMode) {
             document.documentElement.style.setProperty('--card-color', ' rgb(255, 255, 255,0)');
         } else {
@@ -423,15 +517,29 @@
     }
 
 
+    function switchSecretMode() {
+        appState.secretMode = !appState.secretMode
+        writeToLocal()
+        updateSecretModeView()
+    }
+
+
     addEventListener("keypress", e => {
-        if (e.code === "KeyS") {
-            console.dir(e)
-            appState.secretMode = !appState.secretMode
-            writeToLocal()
-            updateSecretMode()
-        }
+        if (e.code === "KeyS") switchSecretMode()
     })
     // ================================================================隐私模式
 
 
+    function pureMode() {
+        toolBarEle.style.display = "none"
+    }
+
+    function completeMode() {
+        toolBarEle.style.display = "block"
+    }
+
+    addEventListener("keyup", e => {
+        console.dir(e)
+        if (e.code === "Escape") completeMode()
+    })
 </script>
