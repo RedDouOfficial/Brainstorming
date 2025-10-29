@@ -120,7 +120,7 @@
         let cardEle = document.querySelector(`[data-id="${card.created}"]`)
         // console.log(cardEle)
         if (cardEle === null) {
-            console.log("不存在，需要创建")
+            // console.log("不存在，需要创建")
             cardEle = document.createElement("div")
             cardEle.className = "miniCard"
             cardEle.dataset.id = card.created
@@ -379,10 +379,13 @@
     addEventListener("keyup", e => {
         if (e.code === "ArrowDown" || e.code === "ArrowUp") {
             const keyList = Object.keys(appState.notes)
-            appState.currentNoteId = keyList[(Number(keyList.indexOf(appState.currentNoteId)) + 1) % keyList.length]
-            console.log(appState.currentNoteId)
+            if (e.code === "ArrowDown") { addDidff = +1 } else if (e.code === "ArrowUp") { addDidff = -1 }
+            const nextIdx = (Number(keyList.length + keyList.indexOf(appState.currentNoteId)) + addDidff) % keyList.length
+            appState.currentNoteId = keyList[nextIdx]
+            // console.log(appState.currentNoteId)
             writeToLocal()
             initAll()
+            console.log(keyList.map(key => (key === keyList[nextIdx] ? "> " : "  ") + appState.notes[key].topic).join("\n"))
         }
     })
     // ================================================================↑↓切换笔记
