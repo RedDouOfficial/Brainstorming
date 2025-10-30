@@ -3,12 +3,6 @@
         --card-color: white
     }
 
-    * {
-        /* box-sizing: border-box;
-        color: rgb(1, 22, 255); */
-        /* font-family: "等线"; */
-    }
-
     html,
     body {
         margin: 0;
@@ -48,12 +42,9 @@
                 margin: 5px;
                 border-radius: 1em;
 
-
                 font-weight: 700;
 
                 box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.325);
-                /* min-width: 3em;
-                min-height: 33px; */
                 vertical-align: middle;
                 text-align: center;
 
@@ -61,12 +52,9 @@
 
                 transition: box-shadow 0.3s ease, filter .1s, color .1s;
 
-
                 &:hover {
                     box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.673);
-                    /* transform: scale(1.05); */
                 }
-
             }
         }
     }
@@ -88,51 +76,49 @@
 
     .miniCard,
     #topic {
-        /* filter: blur(2px); */
         color: var(--card-color);
 
         &:hover {
             color: rgb(255, 255, 255);
-            /* filter: blur(0); */
         }
-
     }
 
     #toolbar {
         background-color: #1f2223;
         padding: 5px;
-
         color: black;
 
         & button {
             color: rgb(0, 0, 0);
         }
+    }
 
+    #file-explorer {
+        min-width: 150px;
     }
 </style>
 
 <body>
     <div id="toolbar">
-        <select id="file-explorer" style="min-width: 150px ;height: 25px;"> </select>
-        <button onclick="createNewTopic()">创建新画布</button>
-        <button onclick="deleteCurrentTopic()">删除当前画布</button>
-        <button onclick="editCurrentTopic()">编辑话题</button>
-        <button onclick="resetAll()">清空一切</button>
-        <button onclick="currentToClipboard()">导出当前笔记</button>
-        <button onclick="exportAll()">备份·导出</button>
-        <button onclick="importAll()">备份·导入</button>
-        <button onclick="switchSecretMode()">隐私模式切换</button>
-        <button onclick="pureMode()">纯净模式</button>
+        <select id="file-explorer"> </select>
+        <button onclick="createNewTopic()">Create New Topic</button>
+        <button onclick="deleteCurrentTopic()">Delete Current Topic</button>
+        <button onclick="editCurrentTopic()">Edit Topic</button>
+        <button onclick="resetAll()">Reset All</button>
+        <button onclick="currentToClipboard()">Current To Clipboard</button>
+        <button onclick="exportAll()">Backup Export</button>
+        <button onclick="importAll()">Backup import</button>
+        <button onclick="switchSecretMode()">Secret Mode</button>
+        <button onclick="pureMode()">Pure Mode</button>
     </div>
 
 
     <aside id="side-bar">
-
         <textarea id="input-area" autofocus></textarea>
         <pre id="stage"> </pre>
     </aside>
 
-    <div id="topic">按下 T，输入本次主题</div>
+    <div id="topic"> </div>
 </body>
 
 
@@ -144,47 +130,34 @@
     const fileExplorerEle = document.querySelector("#file-explorer")
     const toolBarEle = document.querySelector("#toolbar")
 
-    // 加载储存的数据
     let appState
 
-    if (localStorage.getItem("appState")) appState = JSON.parse(localStorage.getItem("appState"))
-    else appState = {
-        notes: {
-            "10000000": {
-                topic: "Object To BUY",
-                cards: {},
-                id: "10000000"
-            }
-        },
-        currentNoteId: "10000000",
-        sideBarWidth: 200,
-        secretMode: false
+    if (localStorage.getItem("appState")) {
+        appState = JSON.parse(localStorage.getItem("appState"))
+    }
+    else {
+        appState = {
+            notes: {
+                "10000000": {
+                    topic: "Object To BUY",
+                    cards: {},
+                    id: "10000000"
+                }
+            },
+            currentNoteId: "10000000",
+            sideBarWidth: 200,
+            secretMode: false
+        }
     }
 
-    // 写入
+
     function writeToLocal() {
         localStorage.setItem("appState", JSON.stringify(appState))
     }
 
-
-    function exportAll() {
-        const output = JSON.stringify(appState)
-        navigator.clipboard.writeText(output)
-    }
-    function importAll() {
-        const inputStr = prompt("请输入导出的数据")
-        if (inputStr.trim() !== "") {
-            appState = JSON.parse(inputStr)
-            writeToLocal()
-            initAll()
-        }
-    }
-
-    function updateOrCreated(card) {
+    function updateOrCreateCard(card) {
         let cardEle = document.querySelector(`[data-id="${card.created}"]`)
-        // console.log(cardEle)
         if (cardEle === null) {
-            // console.log("不存在，需要创建")
             cardEle = document.createElement("div")
             cardEle.className = "miniCard"
             cardEle.dataset.id = card.created
@@ -198,8 +171,6 @@
         cardEle.textContent = card.content
         cardEle.style.background = card.bgc
     }
-
-
 
     function updateFileExplorerView() {
         fileExplorerEle.innerHTML = ""
@@ -230,14 +201,20 @@
         sideBarEle.style.width = appState.sideBarWidth
         topicEle.textContent = appState.notes[appState.currentNoteId].topic ?? ""
 
-        const list = Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id])
+        const list = Object.keys(appState.notes[appState.currentNoteId].cards).map(id => appState.notes[appState.currentNoteId].cards[id])
         for (let card of list) {
-            updateOrCreated(card)
+            updateOrCreateCard(card)
         }
     }
     initAll()
 
-    // 回车就能创建================================================================
+
+    // ===============================================================================================================================================================
+    //                                     For Cards
+    // ===============================================================================================================================================================
+
+
+    // Create Card ================================================================
 
     function genRandomGradient() {
         const hue1 = Math.floor(Math.random() * 360)
@@ -246,11 +223,8 @@
         const color1 = `hsla(${hue1},100%,50%,0.5)`
         const color2 = `hsla(${hue2},100%,50%,0.5)`
         const color3 = `hsla(${hue3},100%,50%,0.5)`
-
         const degree = Math.floor(Math.random() * 360)
-
         const gradientStr = `linear-gradient(${degree}deg,${color1},${color2},${color3})`
-
         return gradientStr
     }
 
@@ -267,14 +241,11 @@
             appState.notes[appState.currentNoteId].cards[timestamp] = { content: inputContent, created: timestamp, position: [0, 0], size: [60, 90], zIndex: 1, stylePosition: "static", bgc: gradientStr }
 
             writeToLocal()
-            updateOrCreated(appState.notes[appState.currentNoteId].cards[timestamp])
-
+            updateOrCreateCard(appState.notes[appState.currentNoteId].cards[timestamp])
         }
     })
 
-    // ================================================================回车就能创建
-
-    // 中键删除功能================================================================
+    // Delete Card ================================================================
     function deleteCard(id) {
         delete appState.notes[appState.currentNoteId].cards[id]
         let cardEle = document.querySelector(`[data-id="${id}"]`)
@@ -283,38 +254,15 @@
     }
 
     addEventListener("mousedown", e => {
-        // console.dir(e)
         if (e.button === 1 && e.target.matches(".miniCard")) {
             e.preventDefault()
             deleteCard(e.target.dataset.id)
         }
     })
-    // ================================================================中键删除功能
 
-
-    // 全部清空功能================================================================
-    function resetAll() {
-        const sureText = prompt("将会重置一切。确认请输入：确认删除一切")
-        if (sureText === "确认删除一切") {
-            appState = {}
-            localStorage.clear()
-            console.dir(appState)
-            initAll()
-        }
-    }
-    addEventListener("keypress", e => {
-        console.dir(e)
-        if (e.code === "KeyQ" && e.shiftKey && e.ctrlKey) {
-            resetAll()
-        }
-    })
-
-    // ================================================================全部清空功能
-
-
-    // 卡片拖动================================================================
+    // Move Card ================================================================
     function getMaxZIndex() {
-        return Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id].zIndex).reduce((a, b) => Math.max(a, b), 1)
+        return Object.keys(appState.notes[appState.currentNoteId].cards).map(id => appState.notes[appState.currentNoteId].cards[id].zIndex).reduce((a, b) => Math.max(a, b), 1)
     }
 
     stageEle.addEventListener("mousedown", e => {
@@ -334,12 +282,12 @@
                 // e.target.style.cursor = "grabbing"
 
                 lastE = e
-                // console.dir(e)
+
                 const currentClient = [e.clientX, e.clientY]
                 const dx = currentClient[0] - initClient[0]
                 const dy = currentClient[1] - initClient[1]
                 appState.notes[appState.currentNoteId].cards[timestamp].position = [initPos[0] + dx, initPos[1] + dy]
-                updateOrCreated(appState.notes[appState.currentNoteId].cards[timestamp])
+                updateOrCreateCard(appState.notes[appState.currentNoteId].cards[timestamp])
                 writeToLocal()
 
             }
@@ -366,12 +314,10 @@
             writeToLocal()
         }
     })
-    // ================================================================卡片拖动
 
-
-    // 双击搜索功能================================================================
+    // Double Click Card ================================================================
     addEventListener("dblclick", e => {
-        // console.dir(e)
+
 
         if (e.target.matches(".miniCard")) {
             console.log("用户双击了卡片")
@@ -379,12 +325,59 @@
             window.open(`https://www.google.com/search?q=${keyword}`, "_blank");
         }
     })
-    // ================================================================双击搜索功能
+
+    // ===============================================================================================================================================================
+    //                                     For Topic
+    // ===============================================================================================================================================================
 
 
+    // Create Topic and Delete topic ================================================================
+    function createNewTopic() {
+        const timestamp = Date.now()
+        const topic = prompt("Please input this Topic")
+        if (topic !== "") {
+            if (!appState.notes) { appState.notes = {} }
+            appState.notes[timestamp] = { topic: topic, cards: {}, id: timestamp }
+            appState.currentNoteId = timestamp
+            writeToLocal()
+            initAll()
+        }
+    }
 
-    // aside 宽度调整功能 ================================================================
+    function deleteCurrentTopic() {
+        delete appState.notes[appState.currentNoteId]
+        writeToLocal()
+        initAll()
+    }
 
+    // Edit Topic ================================================================
+
+    function editCurrentTopic() {
+        const topic = prompt("Please Edit this Topic", appState.notes[appState.currentNoteId].topic ?? "")
+        topicEle.textContent = appState.notes[appState.currentNoteId].topic = topic
+        writeToLocal()
+        initAll()
+    }
+
+    // ↑↓ Switch Topic ================================================================
+
+    addEventListener("keyup", e => {
+        if (e.code === "ArrowDown" || e.code === "ArrowUp") {
+            const keyList = Object.keys(appState.notes)
+            if (e.code === "ArrowDown") { addDidff = +1 } else if (e.code === "ArrowUp") { addDidff = -1 }
+            const nextIdx = (Number(keyList.length + keyList.indexOf(appState.currentNoteId)) + addDidff) % keyList.length
+            appState.currentNoteId = keyList[nextIdx]
+            writeToLocal()
+            initAll()
+            console.log(keyList.map(key => (key === keyList[nextIdx] ? "> " : "  ") + appState.notes[key].topic).join("\n"))
+        }
+    })
+
+    // ===============================================================================================================================================================
+    //                                     For UI
+    // ===============================================================================================================================================================
+
+    // aside Width ================================================================
 
     sideBarEle.addEventListener("mousemove", e => {
         if (e.clientX > sideBarEle.clientWidth * 0.9 && e.clientX < sideBarEle.clientWidth) {
@@ -395,7 +388,7 @@
     })
     sideBarEle.addEventListener("mousedown", e => {
         if (e.target.matches("pre#stage")) {
-            // console.dir(e)
+
             const initClientX = e.clientX
             const initWidth = sideBarEle.clientWidth
 
@@ -422,91 +415,7 @@
 
     })
 
-    //  ================================================================ aside 宽度调整功能
-
-    // 编辑题目功能================================================================
-
-    function editCurrentTopic() {
-        const topic = prompt("请编辑本次围绕的主题", appState.notes[appState.currentNoteId].topic ?? "")
-        topicEle.textContent = appState.notes[appState.currentNoteId].topic = topic
-        writeToLocal()
-        initAll()
-    }
-
-    addEventListener("keypress", e => {
-        // console.dir(e)
-        if (e.code === "KeyT") {
-            editCurrentTopic()
-        }
-    })
-
-    // ================================================================编辑题目功能
-
-
-    // 导出数据功能================================================================
-    function currentToClipboard() {
-        const text = Array.from(Object.keys(appState.notes[appState.currentNoteId].cards)).map(id => appState.notes[appState.currentNoteId].cards[id].content).join("\n")
-        navigator.clipboard.writeText(text)
-    }
-
-    addEventListener("keypress", e => {
-        if (e.code === "KeyE") {
-            e.preventDefault()
-            currentToClipboard()
-        }
-    })
-
-    // ================================================================导出数据功能
-
-
-    // Create new Topic ================================================================
-    function createNewTopic() {
-        const timestamp = Date.now()
-        const topic = prompt("请输入本次围绕的主题")
-        if (topic !== "") {
-            if (!appState.notes) { appState.notes = {} }
-            appState.notes[timestamp] = { topic: topic, cards: {}, id: timestamp }
-            appState.currentNoteId = timestamp
-            writeToLocal()
-            initAll()
-        }
-
-    }
-
-    addEventListener("keypress", e => {
-        if (e.code === "KeyN") {
-            createNewTopic()
-        }
-    })
-    // ================================================================ Create new Topic
-
-
-
-    function deleteCurrentTopic() {
-        delete appState.notes[appState.currentNoteId]
-        writeToLocal()
-        initAll()
-    }
-
-    // ↑↓切换笔记================================================================
-
-    addEventListener("keyup", e => {
-        if (e.code === "ArrowDown" || e.code === "ArrowUp") {
-            const keyList = Object.keys(appState.notes)
-            if (e.code === "ArrowDown") { addDidff = +1 } else if (e.code === "ArrowUp") { addDidff = -1 }
-            const nextIdx = (Number(keyList.length + keyList.indexOf(appState.currentNoteId)) + addDidff) % keyList.length
-            appState.currentNoteId = keyList[nextIdx]
-            // console.log(appState.currentNoteId)
-            writeToLocal()
-            initAll()
-            console.log(keyList.map(key => (key === keyList[nextIdx] ? "> " : "  ") + appState.notes[key].topic).join("\n"))
-        }
-    })
-    // ================================================================↑↓切换笔记
-
-
-
-    // 隐私模式================================================================
+    // Secret Mode ================================================================
 
     function updateSecretModeView() {
         if (appState.secretMode) {
@@ -527,8 +436,8 @@
     addEventListener("keypress", e => {
         if (e.code === "KeyS") switchSecretMode()
     })
-    // ================================================================隐私模式
 
+    // Pure Mode ================================================================
 
     function pureMode() {
         toolBarEle.style.display = "none"
@@ -539,7 +448,40 @@
     }
 
     addEventListener("keyup", e => {
-        console.dir(e)
         if (e.code === "Escape") completeMode()
     })
+
+
+    // ===============================================================================================================================================================
+    //                                     For Data
+    // ===============================================================================================================================================================
+
+    // Reset ================================================================
+    function currentToClipboard() {
+        const text = Object.keys(appState.notes[appState.currentNoteId].cards).map(id => appState.notes[appState.currentNoteId].cards[id].content).join("\n")
+        navigator.clipboard.writeText(text)
+    }
+
+    function exportAll() {
+        const output = JSON.stringify(appState)
+        navigator.clipboard.writeText(output)
+    }
+    function importAll() {
+        const inputStr = prompt("Please input your Exported Data")
+        if (inputStr.trim() !== "") {
+            appState = JSON.parse(inputStr)
+            writeToLocal()
+            initAll()
+        }
+    }
+
+    function resetAll() {
+        const sureText = prompt("All data will be lost, input to make sure：DELETE ALL")
+        if (sureText === "DELETE ALL") {
+            appState = {}
+            localStorage.clear()
+            console.dir(appState)
+            initAll()
+        }
+    }
 </script>
