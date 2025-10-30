@@ -317,12 +317,11 @@
 
     // Double Click Card ================================================================
     addEventListener("dblclick", e => {
-
-
         if (e.target.matches(".miniCard")) {
-            console.log("用户双击了卡片")
-            const keyword = e.target.textContent
-            window.open(`https://www.google.com/search?q=${keyword}`, "_blank");
+            console.log(e.target.dataset.id)
+            const newValue = prompt("Please input new value")
+            e.target.textContent = appState.notes[appState.currentNoteId].cards[e.target.dataset.id].content = newValue
+            writeToLocal()
         }
     })
 
