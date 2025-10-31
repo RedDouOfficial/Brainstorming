@@ -1,0 +1,62 @@
+aside {
+  & > * {
+    border-radius: 1em;
+  }
+
+  & > #input-area {
+    background-color: #4d5156;
+    color: white;
+    resize: none;
+    outline: 0;
+  }
+
+  & > #stage {
+    background: linear-gradient(#4d5156, #1f2223) !important;
+
+    height: 80%;
+
+    & > .miniCard {
+      border-radius: 1em;
+
+      font-weight: 700;
+      cursor: grab;
+      box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.325);
+
+      transition: box-shadow 0.3s ease, filter 0.1s, color 0.1s;
+      text-align: center;
+      white-space: pre-line;
+      &:hover {
+        box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.673);
+      }
+    }
+  }
+}
+
+#topic {
+  font-family: Georgia, "Times New Roman", Times, serif;
+  font-size: 120px;
+  user-select: none;
+  opacity: 0.1;
+  font-weight: 900;
+
+  text-align: center;
+}
+
+.miniCard,
+#topic {
+  color: var(--card-color);
+
+  &:hover {
+    color: rgb(255, 255, 255);
+  }
+}
+
+#toolbar {
+  background-color: #1f2223;
+  padding: 5px;
+  color: black;
+
+  & button {
+    color: rgb(0, 0, 0);
+  }
+}

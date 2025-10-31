@@ -1,0 +1,10 @@
+:root {
+  --card-color: white;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #1f2223;
+}
