@@ -1,9 +1,32 @@
+div#toolbar {
+  background-color: #1f2223;
+  padding: 5px;
+  color: black;
+
+  & button {
+    cursor: pointer;
+    color: rgb(0, 0, 0);
+    background-color: rgb(255, 255, 255);
+    border: 0;
+    padding: 5px;
+    border-radius: 3px;
+  }
+
+  & > #file-explorer {
+    min-width: 150px;
+  }
+  & span {
+    color: white;
+  }
+}
+
 aside {
   & > * {
     border-radius: 1em;
   }
 
   & > #input-area {
+    padding: 1em;
     background-color: #4d5156;
     color: white;
     resize: none;
@@ -17,13 +40,14 @@ aside {
 
     & > .miniCard {
       border-radius: 1em;
-
+      max-width: 260px !important;
+      word-wrap: break-word;
       font-weight: 700;
       cursor: grab;
       box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.325);
 
       transition: box-shadow 0.3s ease, filter 0.1s, color 0.1s;
-      text-align: center;
+
       white-space: pre-line;
       &:hover {
         box-shadow: 2px 2px 3px rgba(34, 34, 34, 0.673);
@@ -33,7 +57,6 @@ aside {
 }
 
 #topic {
-  font-family: Georgia, "Times New Roman", Times, serif;
   font-size: 120px;
   user-select: none;
   opacity: 0.1;
@@ -48,15 +71,5 @@ aside {
 
   &:hover {
     color: rgb(255, 255, 255);
-  }
-}
-
-#toolbar {
-  background-color: #1f2223;
-  padding: 5px;
-  color: black;
-
-  & button {
-    color: rgb(0, 0, 0);
   }
 }

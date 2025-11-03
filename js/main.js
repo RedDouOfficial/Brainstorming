@@ -55,7 +55,8 @@ function updateFileExplorerView() {
         optionEle.textContent = appState.notes[id].topic
         fileExplorerEle.appendChild(optionEle)
     }
-    fileExplorerEle.value = appState.currentNoteId
+    console.log(appState.currentNoteId)
+    fileExplorerEle.value = appState.currentNoteId ?? Object.keys(appState.notes)[0] ?? ""
 }
 
 fileExplorerEle.addEventListener("change", e => {
@@ -105,7 +106,7 @@ function genRandomGradient() {
 
 inputAreaEle.addEventListener("keypress", (e) => {
     if (e.code === "Enter" && e.shiftKey === false) {
-        // console.log("用户按下Enter")
+
         e.preventDefault()
         const timestamp = Date.now()
         const inputContent = inputAreaEle.value
@@ -195,7 +196,7 @@ addEventListener("dblclick", e => {
     if (e.target.matches(".miniCard")) {
         e.preventDefault()
         console.log(e.target.dataset.id)
-        const newValue = prompt("Please input new value", e.target.textContent).trim()
+        const newValue = prompt("Please input new value", e.target.textContent)
         if (newValue !== "") {
             e.target.textContent = appState.notes[appState.currentNoteId].cards[e.target.dataset.id].content = newValue
         }
@@ -224,6 +225,7 @@ function createNewTopic() {
 
 function deleteCurrentTopic() {
     delete appState.notes[appState.currentNoteId]
+    updateFileExplorerView()
     writeToLocal()
     initAll()
 }
@@ -237,19 +239,7 @@ function editCurrentTopic() {
     initAll()
 }
 
-// ↑↓ Switch Topic ================================================================
 
-addEventListener("keyup", e => {
-    if (e.code === "ArrowDown" || e.code === "ArrowUp") {
-        const keyList = Object.keys(appState.notes)
-        if (e.code === "ArrowDown") { addDidff = +1 } else if (e.code === "ArrowUp") { addDidff = -1 }
-        const nextIdx = (Number(keyList.length + keyList.indexOf(appState.currentNoteId)) + addDidff) % keyList.length
-        appState.currentNoteId = keyList[nextIdx]
-        writeToLocal()
-        initAll()
-        console.log(keyList.map(key => (key === keyList[nextIdx] ? "> " : "  ") + appState.notes[key].topic).join("\n"))
-    }
-})
 
 // ===============================================================================================================================================================
 //                                     For UI
@@ -313,10 +303,6 @@ function switchSecretMode() {
 }
 
 
-addEventListener("keypress", e => {
-    if (e.code === "KeyS") switchSecretMode()
-})
-
 // Pure Mode ================================================================
 
 function pureMode() {
@@ -350,7 +336,7 @@ function exportAll() {
 }
 function importAll() {
     const inputStr = prompt("Please input your Exported Data")
-    if (inputStr.trim() !== "") {
+    if (inputStr !== "") {
         appState = JSON.parse(inputStr)
         writeToLocal()
         initAll()

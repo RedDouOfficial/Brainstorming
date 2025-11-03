@@ -8,3 +8,8 @@ body {
   padding: 0;
   background-color: #1f2223;
 }
+
+* {
+  font-family: "Cascadia Code", "Cascadia Mono", "Consolas", "Menlo", "Monaco",
+    monospace;
+}

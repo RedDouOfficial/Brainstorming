@@ -9,15 +9,19 @@
 <body>
     <div id="toolbar">
         <select id="file-explorer"> </select>
-        <button onclick="createNewTopic()">Create New Topic</button>
-        <button onclick="deleteCurrentTopic()">Delete Current Topic</button>
+        <span>|</span>
+        <button onclick="createNewTopic()">New Topic</button>
+        <button onclick="deleteCurrentTopic()">Delete This Topic</button>
         <button onclick="editCurrentTopic()">Edit Topic</button>
-        <button onclick="resetAll()">Reset All</button>
         <button onclick="currentToClipboard()">Current To Clipboard</button>
-        <button onclick="exportAll()">Backup Export</button>
-        <button onclick="importAll()">Backup import</button>
+        <span>|</span>
+        <button onclick="exportAll()"> Export</button>
+        <button onclick="importAll()"> Import</button>
+        <span>|</span>
         <button onclick="switchSecretMode()">Secret Mode</button>
         <button onclick="pureMode()">Pure Mode</button>
+        <span>|</span>
+        <button onclick="resetAll()">Reset All</button>
     </div>
 
 
